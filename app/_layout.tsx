@@ -1,39 +1,34 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Slot, usePathname } from 'expo-router'; // Importation de usePathname pour obtenir le chemin actuel
+import AppBar from './components/AppBar';
+import NavBar from './components/NavBar';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+export default function Layout() {
+  const pathname = usePathname(); // Récupérer le chemin actuel
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+  // Liste des pages où l'AppBar et la NavBar ne doivent pas apparaître
+  const excludeHeaderPages = ['/Login', '/Register', '/'];
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
+  // Vérifier si la page actuelle est dans la liste des pages à exclure
+  const showHeader = !excludeHeaderPages.includes(pathname);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <View style={styles.container}>
+      {showHeader && <AppBar />} {/* Afficher AppBar seulement si showHeader est true */}
+      <View style={styles.content}>
+        <Slot /> {/* Le contenu de la page actuelle */}
+      </View>
+      {showHeader && <NavBar />} {/* Afficher NavBar seulement si showHeader est true */}
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+  },
+});
