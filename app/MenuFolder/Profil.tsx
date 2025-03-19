@@ -15,14 +15,31 @@ export default function Profil() {
     Montserrat_700Bold,
   });
 
+  const getStatusImage = (status: string): string => {
+    switch (status) {
+      case 'Nouveau':
+        return 'https://i.postimg.cc/hv72xRSf/Nouveau.png';
+      case 'Vérifié':
+        return 'https://i.postimg.cc/VsVyCzFL/V-rifier.png';
+      case 'Rejeté':
+        return 'https://i.postimg.cc/rpc7ksqg/Non-V-rifier.png';
+      default:
+        return ''; // Retourne une chaîne vide au lieu de `null`
+    }
+  };
+    
+
   // State pour stocker les informations de l'utilisateur
   const [user, setUser] = useState({
     NPI: '',
     nomPrenoms: '',
-    email: '',
+    email: '', 
     role: '',
-    telephone: ''
   });
+
+  const [telephone, setTelephone] = useState('');
+  const [adresse, setAdresse] = useState('');
+  const [statut, setStatut] = useState('');
 
   useEffect(() => {
     // Fonction pour récupérer les données utilisateur depuis SecureStore
@@ -36,8 +53,8 @@ export default function Profil() {
             nomPrenoms: `${parsedUser.Firstname} ${parsedUser.Name}` || '',
             email: parsedUser.Email || '',
             role: parsedUser.Role || '',
-            telephone: parsedUser.Telephone || '',
           });
+          fetchUserProfile(parsedUser.NPI);
         }
       } catch (error) {
         console.error('Erreur lors de la récupération des données utilisateur', error);
@@ -46,6 +63,50 @@ export default function Profil() {
 
     fetchUserData();
   }, []);
+
+  // Fonction pour récupérer le profil utilisateur depuis l'API
+  const fetchUserProfile = async (NPI: string) => {
+    try {
+      const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/profil/${NPI}`); 
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération du profil utilisateur');
+      }
+
+      const data = await response.json();
+      setTelephone(data.Telephone || '');
+      setAdresse(data.Adresse || '');
+      setStatut(data.Statut_profil || '');
+    } catch (error) {
+      console.error('Erreur API:', error);
+    }
+  };
+
+  // Fonction pour envoyer les modifications au backend
+  const handleSaveChanges = async () => {
+    try {
+      const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/modif/${user.NPI}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          Telephone: telephone,
+          Adresse: adresse,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour des informations');
+      }
+
+      const data = await response.json();
+      Alert.alert('Succès', data.message);
+    } catch (error) {
+      console.error('Erreur API:', error);
+      Alert.alert('Erreur', 'Il y a eu un problème lors de la mise à jour de votre profil.');
+    }
+  };
 
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
 
@@ -96,27 +157,38 @@ export default function Profil() {
         </TouchableOpacity>
 
         <Text style={styles.idText}>{user.NPI}</Text>
-        <Text style={styles.idText}>{user.nomPrenoms}</Text>
+        <View style={styles.statusContainer}>
+          <Text style={styles.idText}>{user.nomPrenoms}</Text>
+          {getStatusImage(statut) !== '' && (
+          <Image 
+            source={{ uri: getStatusImage(statut) }} 
+            style={styles.statusImage} 
+          />
+          )}
+        </View>
+
       </View>
 
       <View style={styles.formContainer}>
-
         <View style={styles.form}>
           <TextInput style={styles.input} placeholder="Email" value={user.email}  
             editable={false} keyboardType="email-address" />   
-          <TextInput style={styles.input} placeholder="Numéro" value={user.telephone}
-            editable={false} keyboardType="phone-pad" />       
+          <TextInput style={styles.input} placeholder="Numéro de téléphone" 
+            value={telephone} onChangeText={setTelephone} />       
           <TextInput style={styles.input} value={user.role} 
-            editable={false} placeholder="Profession" />
-          <TextInput style={styles.input} placeholder="Adresse" />
+            editable={false} placeholder="Profession"  />
+          <TextInput style={styles.input} placeholder="Adresse" value={adresse} onChangeText={setAdresse} />
           
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/ElevesFolder/Eleves')}>
+          <TouchableOpacity style={styles.button} onPress={handleSaveChanges}>
             <Text style={styles.buttonText}>Enregistrer les modifications</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonOrange} onPress={() => router.push('/MenuFolder/CompleterProfil')}>
-            <Text style={styles.buttonText}>Compléter votre profil</Text>
-          </TouchableOpacity>
+          {statut !== 'Vérifié' && (
+            <TouchableOpacity style={styles.buttonOrange} onPress={() => router.push('/MenuFolder/CompleterProfil')}>
+              <Text style={styles.buttonText}>Compléter votre profil</Text>
+            </TouchableOpacity>
+          )}
+
         </View>
       </View>
       
@@ -185,17 +257,9 @@ const styles = StyleSheet.create({
   formContainer: {
     marginTop: 15,  
   },
-  formTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#282828',
-    textAlign: 'center',
-    marginBottom: 20,
-    fontFamily: 'Montserrat_700Bold',
-  },
   form: {
     width: '100%',
-    gap: 1, // Espacement uniforme
+    gap: 1, 
   },
   input: {
     height: 45,
@@ -205,7 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     fontSize: 12,
     color: '#282828',
-    marginBottom: 8, // Uniformisation de l'espacement
+    marginBottom: 8,
     fontFamily: 'Montserrat_400Regular',
   },
   button: {
@@ -214,7 +278,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8, // Même espacement que les champs
+    marginBottom: 8,
   },
   buttonOrange: {
     height: 45,
@@ -222,7 +286,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 8, // Même espacement que les champs
+    marginBottom: 8,
   },
   buttonText: {
     color: '#F3F1FF',
@@ -230,4 +294,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     fontFamily: 'Montserrat_700Bold',
   },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  statusImage: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+  },
+  
 });

@@ -10,6 +10,8 @@ interface FormData {
   Name: string;
   Firstname: string;
   Telephone: string;
+  Adresse: string;
+  Matiere: string;
   Email: string;
   Password: string;
   ConfirmPassword: string;
@@ -28,6 +30,8 @@ export default function RegisterPage() {
     Firstname: '',
     Telephone: '',
     Email: '',
+    Adresse: '',
+    Matiere: '',
     Password: '',
     ConfirmPassword: '',
   });
@@ -41,7 +45,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async () => {
 
-    if (!formData.NPI || !formData.Name || !formData.Firstname || !formData.Telephone || !formData.Email || !formData.Password || !formData.ConfirmPassword) {
+    if (!formData.NPI || !formData.Name || !formData.Firstname || !formData.Telephone || !formData.Matiere || !formData.Adresse || !formData.Email || !formData.Password || !formData.ConfirmPassword) {
       setError('Veuillez remplir tous les champs');
       return;
     }
@@ -98,7 +102,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch('https://access-backend-a961a1f4abb2.herokuapp.com/api/register', {  
+      const response = await fetch('https://access-backend-a961a1f4abb2.herokuapp.com/api/register_educateur', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -109,9 +113,11 @@ export default function RegisterPage() {
           Name: formData.Name,
           Firstname: formData.Firstname,
           Telephone: formData.Telephone,
+          Adresse: formData.Adresse,
+          Matiere: formData.Matiere,
           Email: formData.Email,
           Password: formData.Password,
-          Role: 'EDUCATEUR', 
+          Role: 'Educateur', 
         }),
       });
 
@@ -175,10 +181,22 @@ export default function RegisterPage() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Numéro"
+            placeholder="Numéro de téléphone"
             keyboardType="phone-pad"
             value={formData.Telephone}
             onChangeText={(text) => handleInputChange('Telephone', text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Matière enseignée"
+            value={formData.Matiere}
+            onChangeText={(text) => handleInputChange('Matiere', text)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Adresse"
+            value={formData.Adresse}
+            onChangeText={(text) => handleInputChange('Adresse', text)}
           />
           <TextInput
             style={styles.input}

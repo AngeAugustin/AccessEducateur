@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import * as SecureStore from 'expo-secure-store';
 
 export default function CompleterProfil() {
   const router = useRouter();
+  const [user, setUser] = useState<{ NPI: string }>({ NPI: '' });
 
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
@@ -15,9 +17,14 @@ export default function CompleterProfil() {
 
   const [fileCIP, setFileCIP] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [fileCasier, setFileCasier] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
-
-  const allowedFileTypes = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
-  const maxFileSize = 5 * 1024 * 1024; // 5Mo
+  const [formData, setFormData] = useState({
+    Date_naissance: '',
+    Situation_matrimoniale: '',
+    Garant_1: '',
+    Adresse_garant1: '',
+    Garant_2: '',
+    Adresse_garant2: '',
+  });
 
   const pickDocument = async (
     setFile: React.Dispatch<React.SetStateAction<DocumentPicker.DocumentPickerAsset | null>>
@@ -25,41 +32,72 @@ export default function CompleterProfil() {
     const result = await DocumentPicker.getDocumentAsync({ type: '*/*' });
 
     if (!result.canceled && result.assets.length > 0) {
-      const selectedFile = result.assets[0];
-
-      if (!allowedFileTypes.includes(selectedFile.mimeType || '')) {
-        Alert.alert('Format invalide', 'Veuillez sélectionner un fichier PNG, JPEG, WEBP ou PDF.');
-        return;
-      }
-
-      if (selectedFile.size && selectedFile.size > maxFileSize) {
-        Alert.alert('Taille trop grande', 'Le fichier ne doit pas dépasser 5 Mo.');
-        return;
-      }
-
-      setFile(selectedFile);
+      setFile(result.assets[0]);
     }
   };
 
-  const renderFilePicker = (
-    label: string,
-    file: DocumentPicker.DocumentPickerAsset | null,
-    setFile: React.Dispatch<React.SetStateAction<DocumentPicker.DocumentPickerAsset | null>>
-  ) => (
-    <View style={styles.fileContainer}>
-      <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFile)}>
-        <Text style={styles.fileButtonText}>{label}</Text>
-      </TouchableOpacity>
-      {file && (
-        <View style={styles.fileInfo}>
-          <Text style={styles.fileName}>{file.name} ({(file.size! / 1024).toFixed(2)} KB)</Text>
-          <TouchableOpacity onPress={() => setFile(null)}>
-            <Text style={styles.removeFile}>✕</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await SecureStore.getItemAsync('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser({ NPI: parsedUser.NPI || '' });
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données utilisateur', error);
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!user.NPI) {
+      Alert.alert('Erreur', 'Identifiant utilisateur (NPI) introuvable.');
+      return;
+    }
+
+    const form = new FormData();
+    form.append('NPI', user.NPI);
+    Object.entries(formData).forEach(([key, value]) => form.append(key, value));
+
+    if (fileCIP) {
+      form.append('Carte_identite', {
+        uri: fileCIP.uri,
+        name: fileCIP.name,
+        type: fileCIP.mimeType,
+      } as any);
+    }
+
+    if (fileCasier) {
+      form.append('Casier_judiciaire', {
+        uri: fileCasier.uri,
+        name: fileCasier.name,
+        type: fileCasier.mimeType,
+      } as any);
+    }
+
+    try {
+      const response = await fetch('https://access-backend-a961a1f4abb2.herokuapp.com/api/complete', {
+        method: 'POST',
+        body: form,
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Succès', data.message);
+        router.push('/MenuFolder/Profil');
+      } else {
+        Alert.alert('Erreur', data.error || 'Une erreur est survenue.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la requête', error);
+      Alert.alert('Erreur', 'Impossible de se connecter au serveur.');
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -75,18 +113,52 @@ export default function CompleterProfil() {
 
         <ScrollView style={styles.formScroll} showsVerticalScrollIndicator={false}>
           <View style={styles.form}>
-            <TextInput style={styles.input} placeholder="Date de naissance" />
-            <TextInput style={styles.input} placeholder="Situation matrimoniale" />
-            <TextInput style={styles.input} placeholder="Informations Garant 1" />
-            <TextInput style={styles.input} placeholder="Adresse Garant 1" />
-            <TextInput style={styles.input} placeholder="Informations Garant 2" />
-            <TextInput style={styles.input} placeholder="Adresse Garant 2" />
-            {renderFilePicker("Carte d'identité ou CIP", fileCIP, setFileCIP)}
-            {renderFilePicker("Casier Judiciaire", fileCasier, setFileCasier)}
+            <TextInput 
+              style={styles.input} 
+              placeholder="Date de naissance"
+              onChangeText={(text) => setFormData({ ...formData, Date_naissance: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Situation matrimoniale"
+              onChangeText={(text) => setFormData({ ...formData, Situation_matrimoniale: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Informations Garant 1"
+              onChangeText={(text) => setFormData({ ...formData, Garant_1: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Adresse Garant 1"
+              onChangeText={(text) => setFormData({ ...formData, Adresse_garant1: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Informations Garant 2"
+              onChangeText={(text) => setFormData({ ...formData, Garant_2: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Adresse Garant 2"
+              onChangeText={(text) => setFormData({ ...formData, Adresse_garant2: text })}
+            />
+            <View style={styles.fileContainer}>
+              <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFileCIP)}>
+                <Text style={styles.fileButtonText}>Carte d'identité ou CIP</Text>
+              </TouchableOpacity>
+              {fileCIP && <Text style={styles.fileName}>{fileCIP.name}</Text>}
+            </View>
+            <View style={styles.fileContainer}>
+              <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFileCasier)}>
+                <Text style={styles.fileButtonText}>Casier Judiciaire</Text>
+              </TouchableOpacity>
+              {fileCasier && <Text style={styles.fileName}>{fileCasier.name}</Text>}
+            </View>
           </View>
         </ScrollView>
 
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/MenuFolder/Profil')}>
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>Valider</Text>
         </TouchableOpacity>
       </View>
