@@ -117,7 +117,7 @@ export default function RegisterPage() {
           Matiere: formData.Matiere,
           Email: formData.Email,
           Password: formData.Password,
-          Role: 'Educateur', 
+          Role: 'EDUCATEUR', 
         }),
       });
 

@@ -18,12 +18,18 @@ export default function CompleterProfil() {
   const [fileCIP, setFileCIP] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [fileCasier, setFileCasier] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [formData, setFormData] = useState({
+    Experience: '',
+    Parcours: '',
     Date_naissance: '',
     Situation_matrimoniale: '',
     Garant_1: '',
     Adresse_garant1: '',
     Garant_2: '',
     Adresse_garant2: '',
+    Dispo1: '',
+    Dispo2: '',
+    Dispo3: '',
+    Dispo4: '',
   });
 
   const pickDocument = async (
@@ -113,6 +119,16 @@ export default function CompleterProfil() {
 
         <ScrollView style={styles.formScroll} showsVerticalScrollIndicator={false}>
           <View style={styles.form}>
+          <TextInput 
+              style={styles.input} 
+              placeholder="Nombres d'années d'expérience"
+              onChangeText={(text) => setFormData({ ...formData, Experience: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Parcours"
+              onChangeText={(text) => setFormData({ ...formData, Parcours: text })}
+            />
             <TextInput 
               style={styles.input} 
               placeholder="Date de naissance"
@@ -155,6 +171,26 @@ export default function CompleterProfil() {
               </TouchableOpacity>
               {fileCasier && <Text style={styles.fileName}>{fileCasier.name}</Text>}
             </View>
+            <TextInput 
+              style={styles.input} 
+              placeholder="Disponibilité 1"
+              onChangeText={(text) => setFormData({ ...formData, Dispo1: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Disponibilité 2"
+              onChangeText={(text) => setFormData({ ...formData, Dispo2: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Disponibilité 3"
+              onChangeText={(text) => setFormData({ ...formData, Dispo3: text })}
+            />
+            <TextInput 
+              style={styles.input} 
+              placeholder="Disponibilité 4"
+              onChangeText={(text) => setFormData({ ...formData, Dispo4: text })}
+            />
           </View>
         </ScrollView>
 
