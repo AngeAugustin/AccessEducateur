@@ -1,18 +1,67 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import * as SecureStore from 'expo-secure-store'; 
+
+// Définition du type pour un eleve assigne
+interface EleveAssigne {
+  Classe_actuelle: string;
+  Nom_enfant: string;
+  Prenom_enfant: string;
+  NPI_enfant: string;
+}
 
 export default function Eleves() {
   const router = useRouter();
+  const [user, setUser] = useState<{ NPI: string }>({ NPI: '' });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [assignes, setAssignes] = useState<EleveAssigne[]>([]);
 
-  // Exemple de données pour le tableau avec des identifiants uniques
-  const enfantsData = [
-    { id: '1', nomPrenom: 'OLA Brice', classe: 'CM2' },
-    { id: '2', nomPrenom: 'LISABI Akala', classe: 'CE1' },
-    { id: '3', nomPrenom: 'FAWANOU Kolawolé', classe: '6 ème' },
-    { id: '4', nomPrenom: 'COFFI Sarah', classe: 'CM2' },
-  ];
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await SecureStore.getItemAsync('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser({ NPI: parsedUser.NPI || '' });
+
+          // Appeler l'API avec le NPI récupéré
+          fetchAssignes(parsedUser.NPI);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données utilisateur', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const fetchAssignes = async (NPI: string) => {
+    try {
+      const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/get_eleves_assignes/${NPI}`);
+      const data = await response.json();
+
+      if (response.ok && data.status === 200) {
+        // Assurez-vous de récupérer les données sous la clé "data"
+        setAssignes(data.data as EleveAssigne[]);
+      } else {
+        setAssignes([]);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des enfants:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -37,18 +86,22 @@ export default function Eleves() {
           <Text style={[styles.tableHeaderText, styles.columnDetails]}>Détails</Text>
         </View>
 
-        {enfantsData.map((enfant, index) => (
-          <View key={enfant.id} style={styles.tableRow}>
-            <Text style={[styles.tableCell, styles.columnEnfant]}>{enfant.nomPrenom}</Text>
-            <Text style={[styles.tableCell, styles.columnMatiere]}>{enfant.classe}</Text>
-            <TouchableOpacity 
-              style={[styles.detailsButton, styles.columnDetails]}
-              onPress={() => router.push(`/ElevesFolder/DetailsEleves`)} 
-            >
-              <Icon name="info-outline" size={24} color="#0a4191" />
-            </TouchableOpacity>
-          </View>
-        ))}
+        {assignes.length > 0 ? (
+          assignes.map((assigne, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Text style={[styles.tableCell, styles.columnEnfant]}>{assigne.Nom_enfant} {assigne.Prenom_enfant}</Text>
+              <Text style={[styles.tableCell, styles.columnMatiere]}>{assigne.Classe_actuelle}</Text>
+              <TouchableOpacity 
+                style={[styles.detailsButton, styles.columnDetails]}
+                onPress={() => router.push(`/ElevesFolder/DetailsEleves?NPI_enfant=${assigne.NPI_enfant}`)} 
+              >
+                <Icon name="info-outline" size={24} color="#0a4191" />
+              </TouchableOpacity>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noDataText}>Aucun élève assigné trouvé</Text>
+        )}
       </View>
       
     </ScrollView>
@@ -146,5 +199,10 @@ const styles = StyleSheet.create({
   columnDetails: {
     flex: 1, // Plus petit pour le bouton
     textAlign: 'center',
+  },
+  noDataText: {
+    textAlign: 'center',
+    color: '#282828',
+    marginTop: 20,
   },
 });

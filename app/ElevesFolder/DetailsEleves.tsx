@@ -1,16 +1,60 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+
+// Déclaration du type des détails de l'élève
+interface EleveDetails {
+  NPI_enfant: string;
+  Duree_tutorat: string;
+  Observation_generale: string;
+  Nom_enfant: string;
+  Prenom_enfant: string;
+  Classe_actuelle: string;
+  Ecole_actuelle: string;
+  Adresse: string;
+}
 
 export default function DetailsEleves() {
   const router = useRouter();
+  const { NPI_enfant } = useLocalSearchParams(); 
 
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
     Montserrat_700Bold,
   });
+
+  // Déclaration de l'état avec le type explicite pour éviter l'erreur
+  const [details, setDetails] = useState<EleveDetails | null>(null);
+
+  // Fonction pour récupérer les détails de l'élève depuis l'API
+  useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/get_details_eleves_assignes/${NPI_enfant}`);
+        const data = await response.json();
+
+        // Si les détails sont trouvés, on les met dans l'état
+        if (data.status === 200) {
+          setDetails(data.data[0]);
+        } else {
+          console.error('Aucun détail trouvé pour cet élève.');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des détails:', error);
+      }
+    };
+
+    if (NPI_enfant) {
+      fetchDetails();
+    }
+  }, [NPI_enfant]);
+
+  // Si les polices ne sont pas encore chargées ou si les détails ne sont pas encore récupérés
+  if (!fontsLoaded || !details) {
+    return <Text>Chargement...</Text>;
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -26,9 +70,9 @@ export default function DetailsEleves() {
         <TouchableOpacity style={styles.avatarWrapper}>
           <Image source={{ uri: 'https://i.postimg.cc/k4MRhY0L/El-ve.png' }} style={styles.avatar} />
         </TouchableOpacity>
-        <Text style={styles.nameText}><Text style={styles.boldText}>LISABI Akala</Text></Text>
-        <Text style={styles.professionText}>Seconde D</Text>
-        <Text style={styles.professionText}>Collège Brice Sinsin</Text>
+        <Text style={styles.nameText}><Text style={styles.boldText}>{details.Nom_enfant} {details.Prenom_enfant}</Text></Text>
+        <Text style={styles.professionText}>{details.Classe_actuelle}</Text>
+        <Text style={styles.professionText}>{details.Ecole_actuelle}</Text>
       </View>
 
       {/* Informations utilisateur en lecture seule */}
@@ -36,13 +80,13 @@ export default function DetailsEleves() {
         <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
 
           <Text style={styles.label}>Durée</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>7 mois</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Duree_tutorat}</Text></View>
 
           <Text style={styles.label}>Observation générale</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>Bien</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Observation_generale}</Text></View>
 
           <Text style={styles.label}>Adresse</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>Abomey-Calavi, Houèto, Maison DOSSOU</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Adresse}</Text></View>
         </ScrollView>
 
       </View>

@@ -17,6 +17,7 @@ export default function CompleterProfil() {
 
   const [fileCIP, setFileCIP] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [fileCasier, setFileCasier] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [filePhoto, setFilePhoto] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [formData, setFormData] = useState({
     Experience: '',
     Parcours: '',
@@ -80,6 +81,14 @@ export default function CompleterProfil() {
         uri: fileCasier.uri,
         name: fileCasier.name,
         type: fileCasier.mimeType,
+      } as any);
+    }
+
+    if (filePhoto) {
+      form.append('Photo_educateur', {
+        uri: filePhoto.uri,
+        name: filePhoto.name,
+        type: filePhoto.mimeType,
       } as any);
     }
 
@@ -170,6 +179,12 @@ export default function CompleterProfil() {
                 <Text style={styles.fileButtonText}>Casier Judiciaire</Text>
               </TouchableOpacity>
               {fileCasier && <Text style={styles.fileName}>{fileCasier.name}</Text>}
+            </View>
+            <View style={styles.fileContainer}>
+              <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFilePhoto)}>
+                <Text style={styles.fileButtonText}>Photo</Text>
+              </TouchableOpacity>
+              {filePhoto && <Text style={styles.fileName}>{filePhoto.name}</Text>}
             </View>
             <TextInput 
               style={styles.input} 
