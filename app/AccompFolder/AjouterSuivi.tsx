@@ -51,7 +51,7 @@ export default function AjouterSuivi() {
           />
           <TouchableOpacity
             style={styles.button}
-            onPress={() => router.push('/ElevesFolder/Eleves')}
+            onPress={() => router.push('/AccompFolder/Accomps')}
           >
             <Text style={styles.buttonText}>Ajouter un suivi</Text>
           </TouchableOpacity>

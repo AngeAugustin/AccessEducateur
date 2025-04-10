@@ -18,6 +18,8 @@ export default function CompleterProfil() {
   const [fileCIP, setFileCIP] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [fileCasier, setFileCasier] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [filePhoto, setFilePhoto] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [fileAcademique, setFileAcademique] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+  const [fileProfessionnel, setFileProfessionnel] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
   const [formData, setFormData] = useState({
     Experience: '',
     Parcours: '',
@@ -92,6 +94,22 @@ export default function CompleterProfil() {
       } as any);
     }
 
+    if (fileAcademique) {
+      form.append('Diplome_academique', {
+        uri: fileAcademique.uri,
+        name: fileAcademique.name,
+        type: fileAcademique.mimeType,
+      } as any);
+    }
+
+    if (fileProfessionnel) {
+      form.append('Diplome_professionnel', {
+        uri: fileProfessionnel.uri,
+        name: fileProfessionnel.name,
+        type: fileProfessionnel.mimeType,
+      } as any);
+    }
+
     try {
       const response = await fetch('https://access-backend-a961a1f4abb2.herokuapp.com/api/complete', {
         method: 'POST',
@@ -141,6 +159,7 @@ export default function CompleterProfil() {
             <TextInput 
               style={styles.input} 
               placeholder="Date de naissance"
+              keyboardType="phone-pad"
               onChangeText={(text) => setFormData({ ...formData, Date_naissance: text })}
             />
             <TextInput 
@@ -182,9 +201,21 @@ export default function CompleterProfil() {
             </View>
             <View style={styles.fileContainer}>
               <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFilePhoto)}>
-                <Text style={styles.fileButtonText}>Photo</Text>
+                <Text style={styles.fileButtonText}>Photo d'identité</Text>
               </TouchableOpacity>
               {filePhoto && <Text style={styles.fileName}>{filePhoto.name}</Text>}
+            </View>
+            <View style={styles.fileContainer}>
+              <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFileAcademique)}>
+                <Text style={styles.fileButtonText}>Dernier diplôme académique</Text>
+              </TouchableOpacity>
+              {fileAcademique && <Text style={styles.fileName}>{fileAcademique.name}</Text>}
+            </View>
+            <View style={styles.fileContainer}>
+              <TouchableOpacity style={styles.fileButton} onPress={() => pickDocument(setFileProfessionnel)}>
+                <Text style={styles.fileButtonText}>Dernier diplôme professionnel</Text>
+              </TouchableOpacity>
+              {fileProfessionnel && <Text style={styles.fileName}>{fileProfessionnel.name}</Text>}
             </View>
             <TextInput 
               style={styles.input} 

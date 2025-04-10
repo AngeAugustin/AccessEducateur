@@ -4,8 +4,7 @@ import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useFonts } from 'expo-font';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
-import * as ImagePicker from 'expo-image-picker'; 
-import * as SecureStore from 'expo-secure-store'; 
+import * as SecureStore from 'expo-secure-store';
 
 export default function Profil() {
   const router = useRouter();
@@ -27,7 +26,6 @@ export default function Profil() {
         return ''; // Retourne une chaîne vide au lieu de `null`
     }
   };
-    
 
   // State pour stocker les informations de l'utilisateur
   const [user, setUser] = useState({
@@ -40,6 +38,9 @@ export default function Profil() {
   const [telephone, setTelephone] = useState('');
   const [adresse, setAdresse] = useState('');
   const [statut, setStatut] = useState('');
+  const [matiere, setMatiere] = useState('');
+  const [niveau, setNiveau] = useState('');
+  const [photoEducateur, setPhotoEducateur] = useState('');
 
   useEffect(() => {
     // Fonction pour récupérer les données utilisateur depuis SecureStore
@@ -77,6 +78,9 @@ export default function Profil() {
       setTelephone(data.Telephone || '');
       setAdresse(data.Adresse || '');
       setStatut(data.Statut_profil || '');
+      setMatiere(data.Matiere || ''); // Récupérer la matière
+      setNiveau(data.Niveau || ''); // Récupérer le niveau
+      setPhotoEducateur(data.Photo_educateur || ''); // Récupérer la photo de l'éducateur
     } catch (error) {
       console.error('Erreur API:', error);
     }
@@ -108,29 +112,19 @@ export default function Profil() {
     }
   };
 
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
-
-  const handleImageUpload = async () => {
-    let permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
-      Alert.alert("Permission requise", "Vous devez autoriser l'accès à la galerie pour choisir une image.");
-      return;
-    }
-
-    let pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!pickerResult.canceled && pickerResult.assets && pickerResult.assets.length > 0) {
-      setAvatarUri(pickerResult.assets[0].uri);
-    }
+  // Fonction pour convertir la chaîne base64 en URL d'image
+  const convertBase64ToImage = (base64String: string) => {
+    return `data:image/jpeg;base64,${base64String}`;  // S'assurer que le type de l'image est correct, ici 'jpeg'
   };
 
-  const handleRemoveImage = () => {
-    setAvatarUri(null);
+  // Met à jour le niveau en fonction de sa valeur
+  const getProfessionByNiveau = (niveau: string) => {
+    if (niveau === 'Cycle I') {
+      return 'Professeur(e) Adjoint(e)';
+    } else if (niveau === 'Cycle II') {
+      return 'Professeur(e) Certifié(e)';
+    }
+    return niveau; // retourne la valeur par défaut si le niveau n'est ni "Cycle I" ni "Cycle II"
   };
 
   return (
@@ -143,39 +137,34 @@ export default function Profil() {
       </View> 
 
       <View style={styles.avatarContainer}>
-        <TouchableOpacity onPress={handleImageUpload} style={styles.avatarWrapper}>
-          {avatarUri ? (
-            <Image source={{ uri: avatarUri }} style={styles.avatar} />
+        <View style={styles.avatarWrapper}>
+          {photoEducateur ? (
+            <Image source={{ uri: convertBase64ToImage(photoEducateur) }} style={styles.avatar} />
           ) : (
-            <Icon name="camera-alt" size={40} color="#0a4191" />
-          )}
-          {avatarUri && (
-            <TouchableOpacity onPress={handleRemoveImage} style={styles.deleteButton}>
-              <Icon name="delete" size={24} color="orange" />
-            </TouchableOpacity>
-          )}
-        </TouchableOpacity>
-
-        <Text style={styles.idText}>{user.NPI}</Text>
-        <View style={styles.statusContainer}>
-          <Text style={styles.idText}>{user.nomPrenoms}</Text>
-          {getStatusImage(statut) !== '' && (
-          <Image 
-            source={{ uri: getStatusImage(statut) }} 
-            style={styles.statusImage} 
-          />
+            <Icon name="account-circle" size={40} color="#0a4191" />
           )}
         </View>
 
+        <Text style={styles.idText}>{user.NPI || ''}</Text>
+        <View style={styles.statusContainer}>
+          <Text style={styles.idText}>{user.nomPrenoms || ''}</Text>
+          {getStatusImage(statut) !== '' && (
+            <Image 
+              source={{ uri: getStatusImage(statut) }} 
+              style={styles.statusImage} 
+            />
+          )}
+        </View>
+        <Text style={styles.idText}>{`${getProfessionByNiveau(niveau) || ''} en ${matiere || ''}`}</Text> 
       </View>
 
       <View style={styles.formContainer}>
         <View style={styles.form}>
-          <TextInput style={styles.input} placeholder="Email" value={user.email}  
+          <TextInput style={styles.input} placeholder="Email" value={user.email || ''}  
             editable={false} keyboardType="email-address" />   
           <TextInput style={styles.input} placeholder="Numéro de téléphone" 
             value={telephone} onChangeText={setTelephone} />       
-          <TextInput style={styles.input} value={user.role} 
+          <TextInput style={styles.input} value={user.role || ''} 
             editable={false} placeholder="Profession"  />
           <TextInput style={styles.input} placeholder="Adresse" value={adresse} onChangeText={setAdresse} />
           
@@ -239,14 +228,6 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 50,
   },
-  deleteButton: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 5,
-    borderRadius: 15,
-  },
   idText: {
     marginTop: 5,
     fontSize: 12,
@@ -304,5 +285,4 @@ const styles = StyleSheet.create({
     height: 20,
     resizeMode: 'contain',
   },
-  
 });

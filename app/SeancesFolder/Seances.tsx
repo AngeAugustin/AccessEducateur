@@ -1,18 +1,68 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import * as SecureStore from 'expo-secure-store'; 
+
+// Définition du type pour une séance
+interface Seance {
+  Id_seance: string;
+  Nom_enfant: string;
+  Prenom_enfant: string;
+  NPI_enfant: string;
+  Date_seance: string;
+}
 
 export default function Seances() {
-  const router = useRouter();
+  const router = useRouter(); 
+  const [user, setUser] = useState<{ NPI: string }>({ NPI: '' });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [seances, setSeances] = useState<Seance[]>([]);
 
-  // Exemple de données pour le tableau avec des identifiants uniques
-  const enfantsData = [
-    { id: '1', nomPrenom: 'OLA Brice', date: '15/01/2025' },
-    { id: '2', nomPrenom: 'LISABI Akala', date: '12/01/2025' },
-    { id: '3', nomPrenom: 'FAWANOU Kolawolé', date: '09/01/2025' },
-    { id: '4', nomPrenom: 'COFFI Sarah', date: '02/01/2025' },
-  ];
+  useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const userData = await SecureStore.getItemAsync('user');
+          if (userData) {
+            const parsedUser = JSON.parse(userData);
+            setUser({ NPI: parsedUser.NPI || '' });
+  
+            // Appeler l'API avec le NPI récupéré
+            fetchSeances(parsedUser.NPI);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération des données utilisateur', error);
+        }
+      };
+  
+      fetchUserData();
+    }, []);
+  
+    const fetchSeances = async (NPI: string) => {
+      try {
+        const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/get_seance/${NPI}`);
+        const data = await response.json();
+  
+        if (response.ok && data.status === 200) {
+          // Assurez-vous de récupérer les données sous la clé "data"
+          setSeances(data.data as Seance[]);
+        } else {
+          setSeances([]);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des seances:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    if (loading) {
+      return (
+        <View style={styles.container}>
+          <Text>Chargement...</Text>
+        </View>
+      );
+    }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -37,18 +87,23 @@ export default function Seances() {
           <Text style={[styles.tableHeaderText, styles.columnDetails]}>Détails</Text>
         </View>
 
-        {enfantsData.map((enfant, index) => (
-          <View key={enfant.id} style={styles.tableRow}>
-            <Text style={[styles.tableCell, styles.columnEnfant]}>{enfant.nomPrenom}</Text>
-            <Text style={[styles.tableCell, styles.columnMatiere]}>{enfant.date}</Text>
-            <TouchableOpacity 
-              style={[styles.detailsButton, styles.columnDetails]}
-              onPress={() => router.push(`/SeancesFolder/DetailsSeance`)} 
-            >
-              <Icon name="info-outline" size={24} color="#0a4191" />
-            </TouchableOpacity>
-          </View>
-        ))}
+        {seances.length > 0 ? (
+          seances.map((seance, index) => (
+            <View key={index} style={styles.tableRow}>
+              <Text style={[styles.tableCell, styles.columnEnfant]}>{seance.Nom_enfant} {seance.Prenom_enfant}</Text>
+              <Text style={[styles.tableCell, styles.columnMatiere]}>{seance.Date_seance}</Text>
+              <TouchableOpacity 
+                style={[styles.detailsButton, styles.columnDetails]}
+                onPress={() => router.push(`/SeancesFolder/DetailsSeance?Id_seance=${seance.Id_seance}`)} 
+              >
+                <Icon name="info-outline" size={24} color="#0a4191" />
+              </TouchableOpacity>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noDataText}>Aucune séance trouvée</Text>
+        )}
+
       </View>
       
     </ScrollView>
@@ -146,5 +201,10 @@ const styles = StyleSheet.create({
   columnDetails: {
     flex: 1, // Plus petit pour le bouton
     textAlign: 'center',
+  },
+  noDataText: {
+    textAlign: 'center',
+    color: '#282828',
+    marginTop: 20,
   },
 });

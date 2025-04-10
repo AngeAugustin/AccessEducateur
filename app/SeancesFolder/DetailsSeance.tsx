@@ -1,16 +1,58 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+
+// Déclaration du type des détails de la séance
+interface Details {
+  Id_seance: string;
+  Date_seance: string;
+  Heure_seance: string;
+  Observation: string;
+  Travail_effectue: string;
+  Nom_enfant: string;
+  Prenom_enfant: string;
+  Classe_actuelle: string;
+}
 
 export default function DetailsSeance() {
   const router = useRouter();
+  const { Id_seance } = useLocalSearchParams(); 
 
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
     Montserrat_700Bold,
-  });
+  }); 
+
+    const [details, setDetails] = useState<Details | null>(null);
+  
+    useEffect(() => {
+      const fetchDetails = async () => {
+        try {
+          const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/get_seance_details/${Id_seance}`);
+          const data = await response.json();
+  
+          // Si les détails sont trouvés, on les met dans l'état
+          if (data.status === 200) {
+            setDetails(data.data[0]);
+          } else {
+            console.error('Aucun détail trouvé pour cette séance.');
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération des détails:', error);
+        }
+      };
+  
+      if (Id_seance) {
+        fetchDetails();
+      }
+    }, [Id_seance]);
+  
+    // Si les polices ne sont pas encore chargées ou si les détails ne sont pas encore récupérés
+    if (!fontsLoaded || !details) {
+      return <Text>Chargement...</Text>;
+    }
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -26,8 +68,8 @@ export default function DetailsSeance() {
         <TouchableOpacity style={styles.avatarWrapper}>
           <Image source={{ uri: 'https://i.postimg.cc/k4MRhY0L/El-ve.png' }} style={styles.avatar} />
         </TouchableOpacity>
-        <Text style={styles.nameText}><Text style={styles.boldText}>LISABI Akala</Text></Text>
-        <Text style={styles.professionText}>Seconde D</Text>
+        <Text style={styles.nameText}><Text style={styles.boldText}>{details.Nom_enfant} {details.Prenom_enfant}</Text></Text>
+        <Text style={styles.professionText}>{details.Classe_actuelle}</Text>
       </View>
 
       {/* Informations utilisateur en lecture seule */}
@@ -35,16 +77,16 @@ export default function DetailsSeance() {
         <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
 
           <Text style={styles.label}>Date du jour</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>15 / 01 / 2025</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Date_seance}</Text></View>
 
           <Text style={styles.label}>Horaire du jour</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>18H - 20H</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Heure_seance}</Text></View>
 
           <Text style={styles.label}>Observations</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>Pas mal.</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Observation}</Text></View>
 
           <Text style={styles.label}>Travail effectué</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>Aujourd'hui, nous avons abordé la trigonometrie.</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Travail_effectue}</Text></View>
         </ScrollView>
 
       </View>
