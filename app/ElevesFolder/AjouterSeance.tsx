@@ -46,7 +46,7 @@ export default function AjouterSeance() {
 
   const fetchEnfants = async (NPI: string) => {
     try {
-      const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/get_eleves_assignes/${NPI}`);
+      const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/get_eleves_assignes/${NPI}`);
       const data = await response.json();
 
       if (data.status === 200) {
@@ -105,7 +105,7 @@ export default function AjouterSeance() {
 
     try {
       // Envoi des données à l'API
-      const response = await fetch('https://access-backend-a961a1f4abb2.herokuapp.com/api/add_seance', {
+      const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/add_seance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

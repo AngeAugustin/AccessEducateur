@@ -111,7 +111,7 @@ export default function CompleterProfil() {
     }
 
     try {
-      const response = await fetch('https://access-backend-a961a1f4abb2.herokuapp.com/api/complete', {
+      const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/complete', {
         method: 'POST',
         body: form,
         headers: {

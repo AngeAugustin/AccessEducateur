@@ -32,7 +32,7 @@ export default function DetailsEleves() {
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        const response = await fetch(`https://access-backend-a961a1f4abb2.herokuapp.com/api/get_details_eleves_assignes/${NPI_enfant}`);
+        const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/get_details_eleves_assignes/${NPI_enfant}`);
         const data = await response.json();
 
         // Si les détails sont trouvés, on les met dans l'état
