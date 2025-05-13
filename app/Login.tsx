@@ -68,7 +68,7 @@ export default function LoginPage() {
         }));
 
         // Redirige vers la page suivante
-        router.push('/ElevesFolder/Eleves');
+        router.push('/Accueil');
       } else {
         // Vérification de la structure de l'erreur et affichage des messages
         if (data.errors) {

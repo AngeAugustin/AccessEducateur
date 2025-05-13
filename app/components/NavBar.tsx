@@ -8,6 +8,9 @@ export default function NavBar() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push('/Accueil')}>
+        <Icon name="home" size={30} color="#fff" />
+      </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={() => router.push('/ElevesFolder/Eleves')}>
         <Icon name="people" size={30} color="#fff" />
       </TouchableOpacity>
