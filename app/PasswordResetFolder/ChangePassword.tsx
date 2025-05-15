@@ -6,7 +6,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 
 
 export default function ChangePassword() {
-  const [password, setPassword] = useState('');
+  const [Password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
@@ -24,43 +24,46 @@ export default function ChangePassword() {
 
   const router = useRouter(); // Assure-toi que c’est bien importé
 
-    const handleLogin = async () => {
-    setError('');
+  const handleLogin = async () => {
+  setError('');
 
-    if (!confirmPassword || !password) {
-        setError("Veuillez remplir tous les champs.");
-        return;
-    }
+  if (!confirmPassword || !Password) {
+    setError("Veuillez remplir tous les champs.");
+    return;
+  }
 
-    if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+  if (Password !== confirmPassword) {
+    setError('Les mots de passe ne correspondent pas');
+    return;
+  }
+
+  try {
+    const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        NPI,
+        Password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.error || 'Une erreur est survenue.');
       return;
     }
 
-    try {
-        const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/reset-password', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            password: password,
-        }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-        setError(data.error || 'Une erreur est survenue');
-        } else {
-        router.push('/Login'); 
-        }
-    } catch (err) {
-        setError("Erreur de connexion au serveur.");
-        console.error(err);
-    }
-    };
-
+    // Navigation ou message de succès
+    alert('Mot de passe mis à jour avec succès.');
+    router.push('/Login'); // redirige l'utilisateur si tu veux
+  } catch (error) {
+    console.error(error);
+    setError('Erreur réseau. Veuillez réessayer.');
+  }
+};
 
 
   return (
@@ -86,7 +89,7 @@ export default function ChangePassword() {
             style={[styles.input, isFocused && styles.textAreaFocused]}
             placeholder="Mot de passe"
             keyboardType="default"
-            value={password}
+            value={Password}
             onChangeText={setPassword}
           />
           <TextInput
