@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { useFonts } from 'expo-font'; 
 import { router, useRouter } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 
 
-export default function LoginPage() {
-  const [errorMessage, setErrorMessage] = useState('');
+export default function ResetPassword() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [NPI, setNPI] = useState('');
   const [fontsLoaded] = useFonts({
     Montserrat_400Regular,
     Montserrat_700Bold,
@@ -23,67 +21,49 @@ export default function LoginPage() {
     return <Text>Loading...</Text>;  // Ou un indicateur de chargement
   }
 
-  const handleLogin = async () => {
+  const router = useRouter(); // Assure-toi que c’est bien importé
 
-    if (!email || !password) {
-      setError("Veuillez remplir tous les champs.");
-      return;
+    const handleLogin = async () => {
+    setError('');
+
+    if (!email || !NPI) {
+        setError("Veuillez remplir tous les champs.");
+        return;
     }
 
-    if (password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères.');
-      return;
-    }
-
-    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;  // Expression régulière pour un email valide
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailPattern.test(email)) {
-      setError('L\'adresse email n\'est pas valide');
-      return;
+        setError("L'adresse email n'est pas valide");
+        return;
     }
-    
+
     try {
-      const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/login', {
+        const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/reset-password', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          Email: email,
-          Password: password,
-          Role: 'EDUCATEUR',
+            Email: email,
+            NPI: NPI,
         }),
-      });
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok) {
-        // Stocke les données utilisateur de manière sécurisée dans SecureStore
-        await SecureStore.setItemAsync('user', JSON.stringify({
-          Username: data.Username,
-          Name: data.Name,
-          Firstname: data.Firstname,
-          Email: data.Email,
-          Role: data.Role,
-          NPI: data.NPI,
-        }));
-
-        // Redirige vers la page suivante
-        router.push('/Accueil');
-      } else {
-        // Vérification de la structure de l'erreur et affichage des messages
-        if (data.errors) {
-          // Si le backend renvoie un objet avec des erreurs
-          const errorMessages = Object.values(data.errors).flat().join(', ');
-          setError(errorMessages);  // Concatène les messages d'erreur
+        if (!response.ok) {
+        setError(data.error || 'Une erreur est survenue');
         } else {
-          setError(data.error || 'Informations incorrectes');
+        // Navigation vers la page de vérification du code
+        router.push(`/PasswordResetFolder/CodeChecking?NPI=${NPI}`)
         }
-      }
-    } catch (error) {
-      setErrorMessage("Erreur de connexion, veuillez réessayer.");
-      console.error(error);
+    } catch (err) {
+        setError("Erreur de connexion au serveur.");
+        console.error(err);
     }
-  };
+    };
+
+
 
   return (
     <View style={styles.container}>
@@ -91,13 +71,13 @@ export default function LoginPage() {
         <View style={styles.header}>
           <View style={styles.iconContainer}>
             <Image
-              source={{ uri: 'https://i.postimg.cc/9QvqpzQZ/access-2.png' }}
+              source={{ uri: 'https://i.postimg.cc/8PkWZ8ry/rst.png' }}
               style={styles.icon}
             />
           </View>
-          <Text style={styles.title}>Salut à nouveau !</Text>
+          <Text style={styles.title}>Réinitialisation de mot de passe</Text>
           <Text style={styles.subtitle}>
-            Veuillez entrer vos informations de connexion.
+            Veuillez entrer les informations demandées.
           </Text>
         </View>
 
@@ -115,30 +95,21 @@ export default function LoginPage() {
           />
           <TextInput
             style={styles.input}
-            placeholder="Mot de passe"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
+            placeholder="NPI"
+            value={NPI}
+            onChangeText={setNPI}
           />
 
-          <View style={styles.forgotPasswordContainer}>
-            <TouchableOpacity onPress={() => router.push('/PasswordResetFolder/ResetPassword')}>
-              <Text style={styles.forgotPasswordText}>Mot de passe oublié ?</Text>
-            </TouchableOpacity>
+          <View style={styles.AnyContainer}>
+            
           </View>
 
           <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Se connecter</Text>
+            <Text style={styles.buttonText}>Réinitialiser mot de passe</Text>
           </TouchableOpacity>
 
         </View>
 
-        <Text style={styles.signUpText}>
-          Vous n’avez pas de compte ?{' '}
-          <TouchableOpacity onPress={() => router.push('/Register')}>
-            <Text style={styles.signUpLink}>Inscrivez-vous</Text>
-          </TouchableOpacity>
-        </Text>
       </View>
     </View>
   );
@@ -214,7 +185,7 @@ const styles = StyleSheet.create({
   textAreaFocused: {
     borderColor: 'orange', // Couleur des bordures lorsqu'on clique dans le champ
   },
-  forgotPasswordContainer: {
+  AnyContainer: {
     alignItems: 'center',  // Centre le bouton
     marginBottom: 16,
   },
@@ -236,18 +207,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     fontFamily: 'Montserrat_700Bold',  // Applique Montserrat gras pour le texte du bouton
-  },
-  signUpText: {
-    fontSize: 12,
-    color: '#7F7F7F',
-    textAlign: 'center',
-    fontFamily: 'Montserrat_400Regular',  // Applique Montserrat normale ici
-  },
-  signUpLink: {
-    color: '#0a4191',
-    fontWeight: '500',
-    fontFamily: 'Montserrat_700Bold', // Applique Montserrat gras ici
-    fontSize: 12,
   },
   errorText: {
     color: 'red',

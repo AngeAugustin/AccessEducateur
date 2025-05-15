@@ -102,7 +102,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/register_educateur', {  
+      const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/register_educateur', {  
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

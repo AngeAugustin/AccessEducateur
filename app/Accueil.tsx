@@ -37,22 +37,22 @@ const Dashboard: React.FC = () => {
           });
 
           // Appel API pour les séances récentes
-          const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/seances_recentes/${npi}`);
+          const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/seances_recentes/${npi}`);
           const data = await response.json();
           setSeances(data);
 
           // Appel API pour compter les élèves
-          const elevesRes = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/count_eleves/${npi}`);
+          const elevesRes = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/count_eleves/${npi}`);
           const elevesData = await elevesRes.json();
           setEleveCount(elevesData.eleves_uniques);
 
           // Appel API pour compter les séances
-          const seancesRes = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/count_seances/${npi}`);
+          const seancesRes = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/count_seances/${npi}`);
           const seancesData = await seancesRes.json();
           setSeanceCount(seancesData.seances_uniques);
 
           // Récupérer la photo de l'éducateur
-          const filesResponse = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/get-all-files/${npi}`);
+          const filesResponse = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/get-all-files/${npi}`);
           const filesData = await filesResponse.json();
 
           if (filesData?.files?.Photo_educateur) {

@@ -40,7 +40,7 @@ export default function Seances() {
   
     const fetchSeances = async (NPI: string) => {
       try {
-        const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/get_seance/${NPI}`);
+        const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/get_seance/${NPI}`);
         const data = await response.json();
   
         if (response.ok && data.status === 200) {

@@ -68,7 +68,7 @@ export default function Profil() {
   // Fonction pour récupérer le profil utilisateur depuis l'API
   const fetchUserProfile = async (NPI: string) => {
     try {
-      const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/profil/${NPI}`); 
+      const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/profil/${NPI}`); 
 
       if (!response.ok) {
         throw new Error('Erreur lors de la récupération du profil utilisateur');
@@ -89,7 +89,7 @@ export default function Profil() {
   // Fonction pour envoyer les modifications au backend
   const handleSaveChanges = async () => {
     try {
-      const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/modif/${user.NPI}`, {
+      const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/modif/${user.NPI}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

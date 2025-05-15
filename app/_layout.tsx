@@ -8,7 +8,7 @@ export default function Layout() {
   const pathname = usePathname(); // Récupérer le chemin actuel
 
   // Liste des pages où l'AppBar et la NavBar ne doivent pas apparaître
-  const excludeHeaderPages = ['/Login', '/Register', '/'];
+  const excludeHeaderPages = ['/Login', '/Register', '/PasswordResetFolder/ResetPassword', '/PasswordResetFolder/CodeChecking','/PasswordResetFolder/ChangePassword', '/'];
 
   // Vérifier si la page actuelle est dans la liste des pages à exclure
   const showHeader = !excludeHeaderPages.includes(pathname);

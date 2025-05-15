@@ -30,7 +30,7 @@ export default function DetailsSeance() {
     useEffect(() => {
       const fetchDetails = async () => {
         try {
-          const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/AccessBackend/public/api/get_seance_details/${Id_seance}`);
+          const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/get_seance_details/${Id_seance}`);
           const data = await response.json();
   
           // Si les détails sont trouvés, on les met dans l'état
