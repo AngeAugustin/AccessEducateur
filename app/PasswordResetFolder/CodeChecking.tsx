@@ -19,7 +19,7 @@ export default function CodeChecking() {
     return <Text>Loading...</Text>;
   }
 
-  const handleLogin = async () => {
+  const handleChecking = async () => {
     setError('');
 
     if (!Code_secret) {
@@ -77,7 +77,7 @@ export default function CodeChecking() {
 
           <View style={styles.AnyContainer}></View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button} onPress={handleChecking}>
             <Text style={styles.buttonText}>Valider</Text>
           </TouchableOpacity>
         </View>

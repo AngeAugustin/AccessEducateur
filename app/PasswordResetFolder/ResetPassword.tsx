@@ -23,7 +23,7 @@ export default function ResetPassword() {
 
   const router = useRouter(); // Assure-toi que c’est bien importé
 
-    const handleLogin = async () => {
+    const handleReset = async () => {
     setError('');
 
     if (!email || !NPI) {
@@ -104,7 +104,7 @@ export default function ResetPassword() {
             
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button} onPress={handleReset}>
             <Text style={styles.buttonText}>Réinitialiser mot de passe</Text>
           </TouchableOpacity>
 

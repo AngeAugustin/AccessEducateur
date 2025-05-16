@@ -24,7 +24,7 @@ export default function ChangePassword() {
 
   const router = useRouter(); // Assure-toi que c’est bien importé
 
-  const handleLogin = async () => {
+  const handleChange = async () => {
   setError('');
 
   if (!confirmPassword || !Password) {
@@ -103,7 +103,7 @@ export default function ChangePassword() {
             
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <TouchableOpacity style={styles.button} onPress={handleChange}>
             <Text style={styles.buttonText}>Changer le mot de passe</Text>
           </TouchableOpacity>
 
