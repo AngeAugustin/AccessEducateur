@@ -1,17 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store'; 
 
-const paiements = [
-  { id: 1, actor: 'M. KOLA Bashorun', enfant: 'Ange Kadoukpè', valeur: '16 heures', statut: 'effectué' },
-  { id: 2, actor: 'Famille LISABI', enfant: 'Enfant 2', valeur: '16 heures', statut: 'effectué' },
-  { id: 3, actor: 'Famille LALEYE', enfant: '', valeur: '16 heures', statut: 'effectué' },
-  { id: 4, actor: 'M. Afolabi Akiwalé', enfant: 'Enfant 2', valeur: '16 heures', statut: 'effectué' },
-];
+// Définition du type 
+interface Paiement {
+  Id_paiement: string;
+  Parent_nom: string;
+  Parent_prenom : string;
+  Montant_paiement: string;
+  Statut_paiement: string;
+  Date_paiement: string;
+}
 
 export default function Paiements() {
   const router = useRouter();
+  const [user, setUser] = useState<{ NPI: string }>({ NPI: '' });
+  const [loading, setLoading] = useState<boolean>(true);
+  const [paiements, setPaiements] = useState<Paiement[]>([]);
+
+  useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const userData = await SecureStore.getItemAsync('user');
+          if (userData) {
+            const parsedUser = JSON.parse(userData);
+            setUser({ NPI: parsedUser.NPI || '' });
+  
+            // Appeler l'API avec le NPI récupéré
+            fetchPaiements(parsedUser.NPI);
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération des données utilisateur', error);
+        }
+      };
+  
+      fetchUserData();
+    }, []);
+
+    const fetchPaiements = async (NPI: string) => {
+        try {
+          const response = await fetch(`https://mediumvioletred-mole-607585.hostingersite.com/public/api/paiements_educateur/${NPI}`);
+          const data = await response.json();
+    
+          if (response.ok) {
+            setPaiements(data as Paiement[]);
+          } else {
+            setPaiements([]);
+          }
+
+        } catch (error) {
+          console.error('Erreur lors de la récupération des enfants:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      if (loading) {
+        return (
+          <View style={styles.container}>
+            <Text>Chargement...</Text>
+          </View>
+        );
+      }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -22,22 +74,26 @@ export default function Paiements() {
         </View>
       </View>
 
-      {paiements.map(p => (
-        <View key={p.id} style={styles.paiementCard}>
+      {paiements.length > 0 ? (paiements.map(p => (
+        <View key={p.Id_paiement} style={styles.paiementCard}>
           <Image source={{ uri: 'https://i.postimg.cc/13fY6f32/Paiement-effectu.png' }} style={styles.paiementImage} />
           <View style={styles.paiementTextContainer}>
-            <Text style={styles.paiementTitle}>{p.actor}</Text>
-            {p.enfant ? <Text style={styles.paiementDetails}>{`${p.enfant} - ${p.valeur}`}</Text> : null}
-            <Text style={styles.paiementStatut}>Paiement {p.statut}</Text>
+            <Text style={styles.paiementTitle}>{p.Parent_nom} {p.Parent_prenom}</Text>
+            <Text style={styles.paiementDetails}>{`${p.Montant_paiement}`}</Text>
+            <Text style={styles.paiementStatut}>Paiement {p.Statut_paiement}</Text>
           </View>
           <TouchableOpacity 
           style={styles.detailsButton}
-          onPress={() => router.push('/PaiementsFolder/DetailsPaiements')}
+          onPress={() => router.push(`/PaiementsFolder/DetailsPaiements?Id_paiement=${p.Id_paiement}`)} 
           >
               <Icon name="more-vert" size={20} color="#0a4191" />
             </TouchableOpacity>
         </View>
-      ))}
+      ))
+      ) : (
+          <Text style={styles.noDataText}>Aucun paiement trouvé</Text>
+     )}
+              
     </ScrollView>
   );
 }
@@ -114,5 +170,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     fontFamily: 'Montserrat_700Bold',
+  },
+  noDataText: {
+    textAlign: 'center',
+    color: '#282828',
+    marginTop: 20,
   },
 });

@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
           const npi = parsedUser.NPI || '';
           setUser({
             npi,
-            nomPrenoms: `${parsedUser.Firstname} ${parsedUser.Name}` || '',
+            nomPrenoms: `${parsedUser.Firstname}${parsedUser.Name}` || '',
           });
 
           // Appel API pour les séances récentes
