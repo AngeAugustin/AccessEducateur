@@ -81,35 +81,26 @@ console.log(random10Digits);  // ex: "4839201756"
     };
 
     try {
-  const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/add_reclamation', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+      const response = await fetch('https://mediumvioletred-mole-607585.hostingersite.com/public/api/add_reclamation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-  const responseText = await response.text();
-  console.log('Réponse brute :', responseText);
+      const data = await response.json();
 
-  try {
-    const data = JSON.parse(responseText);
-
-    if (data.error) {
-      Alert.alert('Erreur', data.error);
-    } else {
-      Alert.alert('Succès', 'Réclamation faite avec succès!');
-      router.push('/Accueil');
+      if (data.error) {
+              Alert.alert('Erreur', data.error);
+            } else {
+              Alert.alert('Succès', 'Réclamation faite avec succès!');
+              router.push('/Accueil');  
+            }
+    } catch (error) {
+      console.error('Erreur API :', error);
+      Alert.alert('Erreur', 'Une erreur est survenue.');
     }
-  } catch (e) {
-    console.error('Erreur parsing JSON :', e);
-    Alert.alert('Erreur', 'La réponse du serveur est invalide.');
-  }
-} catch (error) {
-  console.error('Erreur API :', error);
-  Alert.alert('Erreur', 'Une erreur est survenue.');
-}
-
   };
 
   if (!fontsLoaded) {
