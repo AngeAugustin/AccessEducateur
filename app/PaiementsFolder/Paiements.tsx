@@ -12,6 +12,7 @@ interface Paiement {
   Montant_paiement: string;
   Statut_paiement: string;
   Date_paiement: string;
+  Paiement: string;
 }
 
 export default function Paiements() {
@@ -84,7 +85,7 @@ export default function Paiements() {
           </View>
           <TouchableOpacity 
           style={styles.detailsButton}
-          onPress={() => router.push(`/PaiementsFolder/DetailsPaiements?Id_paiement=${p.Id_paiement}`)} 
+          onPress={() => router.push(`/PaiementsFolder/DetailsPaiements?Id_paiement=${p.Id_paiement}&Paiement=${p.Paiement}`)} 
           >
               <Icon name="more-vert" size={20} color="#0a4191" />
             </TouchableOpacity>
