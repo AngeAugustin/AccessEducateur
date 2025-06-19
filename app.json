@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.am_likeflybro.AccessEducateur"
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +39,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6cab9920-4f90-4ccb-a2d0-606e44b3ea02"
+      }
     }
   }
 }

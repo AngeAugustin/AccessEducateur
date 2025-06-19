@@ -33,7 +33,7 @@ const Dashboard: React.FC = () => {
           const npi = parsedUser.NPI || '';
           setUser({
             npi,
-            nomPrenoms: `${parsedUser.Firstname}${parsedUser.Name}` || '',
+            nomPrenoms: `${parsedUser.Firstname} ${parsedUser.Name}` || '',
           });
 
           // Appel API pour les séances récentes
@@ -139,7 +139,7 @@ const Dashboard: React.FC = () => {
                 Aucune séance récente trouvée.
               </Text>
             ) : (
-              seances.map((seance: any) => (
+              seances.slice(0, 3).map((seance: any) => ( // 👈 Limite à 3
                 <View key={seance.Id_seance} style={styles.card}>
                   <View style={styles.cardContent}>
                     <Image
@@ -165,6 +165,7 @@ const Dashboard: React.FC = () => {
                 </View>
               ))
             )}
+
           </View>
         </ScrollView>
       </View>

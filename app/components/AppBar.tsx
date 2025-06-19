@@ -71,10 +71,10 @@ const AppBar = () => {
 // Liste des éléments du menu avec des routes définies et typées
 const menuItems: MenuItem[] = [
   { icon: 'person', text: 'Profil', route: '/MenuFolder/Profil' },
-  { icon: 'notifications', text: 'Notifications', route: '/MenuFolder/Notifications' },
-  { icon: 'call', text: 'Contactez-nous', route: '/MenuFolder/Contacts' },
-  { icon: 'document-text', text: 'Conditions générales d\'utilisation', route: '/MenuFolder/Conditions' },
+  // { icon: 'notifications', text: 'Notifications', route: '/MenuFolder/Notifications' },
   { icon: 'alert-circle', text: 'Faire une réclamation', route: '/MenuFolder/Reclamations' },
+  { icon: 'call', text: 'Contactez-nous', route: '/MenuFolder/Contacts' },
+  // { icon: 'document-text', text: 'Conditions générales d\'utilisation', route: '/MenuFolder/Conditions' },
 ];
 
 const styles = StyleSheet.create({

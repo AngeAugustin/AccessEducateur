@@ -85,7 +85,7 @@ export default function Paiements() {
           </View>
           <TouchableOpacity 
           style={styles.detailsButton}
-          onPress={() => router.push(`/PaiementsFolder/DetailsPaiements?Id_paiement=${p.Id_paiement}&Paiement=${p.Paiement}`)} 
+          onPress={() => router.push(`/PaiementsFolder/DetailsPaiements?ID=${p.Paiement}`)} 
           >
               <Icon name="more-vert" size={20} color="#0a4191" />
             </TouchableOpacity>

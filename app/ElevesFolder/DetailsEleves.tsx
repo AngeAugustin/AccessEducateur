@@ -80,7 +80,7 @@ export default function DetailsEleves() {
         <ScrollView style={styles.form} showsVerticalScrollIndicator={false}>
 
           <Text style={styles.label}>Durée</Text>
-          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Duree_tutorat}</Text></View>
+          <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Duree_tutorat} semaines</Text></View>
 
           <Text style={styles.label}>Observation générale</Text>
           <View style={styles.inputReadonly}><Text style={styles.inputText}>{details.Observation_generale}</Text></View>
