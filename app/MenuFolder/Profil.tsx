@@ -123,6 +123,8 @@ export default function Profil() {
       return 'Professeur(e) Adjoint(e)';
     } else if (niveau === 'Cycle II') {
       return 'Professeur(e) Certifié(e)';
+    } else if (niveau === 'Cycle III') {
+      return 'Professeur(e) Cycle Technique';
     }
     return niveau; // retourne la valeur par défaut si le niveau n'est ni "Cycle I" ni "Cycle II"
   };

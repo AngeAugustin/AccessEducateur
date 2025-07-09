@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { useFonts } from 'expo-font'; 
+import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, ScrollView, Linking } from 'react-native';
+import { useFonts } from 'expo-font';
+import Checkbox from 'expo-checkbox'; 
 import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
 import { useRouter } from 'expo-router';
 
@@ -15,6 +16,7 @@ interface FormData {
   Email: string;
   Password: string;
   ConfirmPassword: string;
+  acceptTerms: boolean;
 }
 
 export default function RegisterPage() {
@@ -34,6 +36,7 @@ export default function RegisterPage() {
     Matiere: '',
     Password: '',
     ConfirmPassword: '',
+    acceptTerms: false,
   });
   const [error, setError] = useState('');
   const router = useRouter();
@@ -47,6 +50,11 @@ export default function RegisterPage() {
 
     if (!formData.NPI || !formData.Name || !formData.Firstname || !formData.Telephone || !formData.Matiere || !formData.Adresse || !formData.Email || !formData.Password || !formData.ConfirmPassword) {
       setError('Veuillez remplir tous les champs');
+      return;
+    }
+
+    if (!formData.acceptTerms) {
+      setError('Vous devez accepter les conditions d\'utilisation et la politique de confidentialité');
       return;
     }
 
@@ -109,7 +117,7 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           NPI: formData.NPI,
-          Username: formData.Email, // ou autre nom de champ pour le username
+          Username: formData.Email, 
           Name: formData.Name,
           Firstname: formData.Firstname,
           Telephone: formData.Telephone,
@@ -145,8 +153,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
+    <ScrollView 
+      style={styles.scrollContainer}
+      contentContainerStyle={styles.scrollContentContainer}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.container}>
+        <View style={styles.card}>
         <View style={styles.header}>
           <View style={styles.iconContainer}>
             <Image source={{ uri: 'https://i.postimg.cc/9QvqpzQZ/access-2.png' }} style={styles.icon} />
@@ -220,23 +233,46 @@ export default function RegisterPage() {
             onChangeText={(text) => handleInputChange('ConfirmPassword', text)}
           />
 
+          <TouchableOpacity 
+            style={styles.checkboxContainer} 
+            onPress={() => setFormData({ ...formData, acceptTerms: !formData.acceptTerms })}
+          >
+            <View style={[styles.checkbox, formData.acceptTerms && styles.checkboxChecked]}>
+              {formData.acceptTerms && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={styles.checkboxText}>
+              <TouchableOpacity onPress={() => Linking.openURL('https://votre-site-web.com/conditions-utilisation')}>
+                <Text style={styles.linkText}>J'accepte les conditions d'utilisation et la politique de confidentialité</Text>
+              </TouchableOpacity>
+            </Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.button} onPress={handleSubmit}>
             <Text style={styles.buttonText}>S'inscrire</Text>
           </TouchableOpacity>
         </View>
 
         <Text style={styles.signUpText}>
-          Vous avez déjà un compte ?{' '}
-          <TouchableOpacity onPress={() => router.push('/Login')}>
-            <Text style={styles.signUpLink}>Connectez-vous</Text>
-          </TouchableOpacity>
-        </Text>
+            Avez-vous déjà un compte ? <Text style={styles.signUpLink} onPress={() => router.push('/Login')}>Connectez-vous</Text>
+          </Text>
+
       </View>
     </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -338,5 +374,44 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: 'Montserrat_400Regular',
     fontSize: 12,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  checkbox: {
+    width: 18,
+    height: 18,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    borderRadius: 3,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  checkboxChecked: {
+    backgroundColor: '#0a4191',
+    borderColor: '#0a4191',
+  },
+  checkmark: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  checkboxText: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  linkText: {
+    fontSize: 11,
+    color: '#0a4191',
+    fontFamily: 'Montserrat_700Bold',
+    textDecorationLine: 'underline',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });

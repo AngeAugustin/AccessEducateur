@@ -134,11 +134,9 @@ export default function LoginPage() {
         </View>
 
         <Text style={styles.signUpText}>
-          Vous n’avez pas de compte ?{' '}
-          <TouchableOpacity onPress={() => router.push('/Register')}>
-            <Text style={styles.signUpLink}>Inscrivez-vous</Text>
-          </TouchableOpacity>
+          Vous n'avez pas de compte ? <Text style={styles.signUpLink} onPress={() => router.push('/Register')}>Inscrivez-vous</Text>
         </Text>
+
       </View>
     </View>
   );
