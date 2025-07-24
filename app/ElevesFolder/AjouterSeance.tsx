@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Modal, FlatList } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 import { useFonts } from 'expo-font';
@@ -29,6 +29,23 @@ export default function AjouterSeance() {
   const [heureSeance, setHeureSeance] = useState('');
   const [observations, setObservations] = useState('');
   const [travailEffectue, setTravailEffectue] = useState('');
+
+  // États pour la modale d'heure
+  const [showHeureModal, setShowHeureModal] = useState(false);
+  const [heureText, setHeureText] = useState('');
+
+  // Données statiques pour les heures
+  const generateHeures = () => {
+    const heures = [];
+    for (let i = 6; i <= 20; i++) { // De 06h à 20h pour permettre des créneaux de 3h jusqu'à 23h
+      const heure = i.toString().padStart(2, '0');
+      const heureFin = (i + 3).toString().padStart(2, '0');
+      heures.push(`${heure}h-${heureFin}h`);
+    }
+    return heures;
+  };
+
+  const heures = generateHeures();
 
   const fetchUserData = async () => {
     try {
@@ -68,6 +85,21 @@ export default function AjouterSeance() {
 
     fetchUserData();
   }, []);
+
+  // Fonctions pour gérer le sélecteur d'heure
+  const openHeureSelector = () => {
+    setShowHeureModal(true);
+  };
+
+  const selectHeure = (heure: string) => {
+    setHeureText(heure);
+    setHeureSeance(heure);
+    setShowHeureModal(false);
+  };
+
+  const closeHeureModal = () => {
+    setShowHeureModal(false);
+  };
 
   const generateIdSeance = (referenceTutorat: string) => {
     const now = new Date();
@@ -157,12 +189,14 @@ export default function AjouterSeance() {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
           />
-          <TextInput 
-            style={styles.input} 
-            placeholder="Heure de travail" 
-            value={heureSeance} 
-            onChangeText={setHeureSeance}
-          />
+          <TouchableOpacity 
+            style={styles.heureButton} 
+            onPress={openHeureSelector}
+          >
+            <Text style={styles.heureButtonText}>
+              {heureText || "Heure de travail"}
+            </Text>
+          </TouchableOpacity>
           <TextInput 
             style={styles.input} 
             placeholder="Observations" 
@@ -201,6 +235,39 @@ export default function AjouterSeance() {
         </View>
       </View>
       {renderForm()}
+
+      {/* Modale pour sélectionner l'heure */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showHeureModal}
+        onRequestClose={closeHeureModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Sélectionner une plage horaire</Text>
+              <TouchableOpacity onPress={closeHeureModal} style={styles.closeButton}>
+                <Text style={styles.closeButtonText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={heures}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalItem}
+                  onPress={() => selectHeure(item)}
+                >
+                  <Text style={styles.modalItemText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -303,5 +370,65 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat_400Regular', 
     fontSize: 12,
     color: '#282828',
+  },
+  heureButton: {
+    height: 45,
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginBottom: 5,
+    backgroundColor: '#F8F9FA',
+  },
+  heureButtonText: {
+    fontSize: 12,
+    color: '#282828',
+    fontFamily: 'Montserrat_400Regular',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    width: '85%',
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#282828',
+    fontFamily: 'Montserrat_700Bold',
+  },
+  closeButton: {
+    padding: 5,
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#666',
+    fontWeight: 'bold',
+  },
+  modalItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  modalItemText: {
+    fontSize: 14,
+    color: '#282828',
+    fontFamily: 'Montserrat_400Regular',
+    textAlign: 'center',
   },
 });
