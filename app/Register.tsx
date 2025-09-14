@@ -241,7 +241,7 @@ export default function RegisterPage() {
               {formData.acceptTerms && <Text style={styles.checkmark}>✓</Text>}
             </View>
             <Text style={styles.checkboxText}>
-              <TouchableOpacity onPress={() => Linking.openURL('https://votre-site-web.com/conditions-utilisation')}>
+              <TouchableOpacity onPress={() => Linking.openURL('https://access-admin.vercel.app/politique-educateurs')}>
                 <Text style={styles.linkText}>J'accepte les conditions d'utilisation et la politique de confidentialité</Text>
               </TouchableOpacity>
             </Text>
